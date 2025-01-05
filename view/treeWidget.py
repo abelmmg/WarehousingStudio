@@ -1,4 +1,6 @@
-from PyQt5.QtWidgets import QWidget, QTreeWidget, QVBoxLayout, QTreeWidgetItem, QTableWidgetItem
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPalette
+from PyQt5.QtWidgets import QWidget, QTreeWidget, QVBoxLayout, QTreeWidgetItem, QTableWidgetItem, QHeaderView
 
 
 class TreeWidget(QWidget):
@@ -58,48 +60,15 @@ class TreeWidget(QWidget):
             associated_records = self.df[
                 (self.df['Process'] == selected_process) |
                 (self.df['Subprocess'] == selected_process)]
-            self.update_table(associated_records)
+            self.table.update_table(associated_records, self.current_df)
             self.current_df = self.df
         else:
             if selected_process == 'Interfaces':
                 # Filter the DataFrame to get associated records
                 associated_records = self.req.interfaces
-                self.update_table(associated_records)
+                self.table.update_table(associated_records, self.current_df)
                 self.current_df = self.req.interfaces
             else:
                 associated_records = self.req.applications
-                self.update_table(associated_records)
+                self.table.update_table(associated_records, self.current_df)
                 self.current_df = self.req.applications
-
-
-
-
-
-    def update_table(self, records):
-
-        if self.table.rowCount() > 0:
-            # Update dataset
-            index_column = self.current_df.columns.size - 1
-            len_df = len(self.current_df)
-            for row in range(self.table.rowCount()):
-                index_value = int(self.table.item(row, index_column).text())
-                for col in range(self.table.columnCount()):
-                    item = self.table.item(row, col)
-                    if item:
-                        new_value = item.text()
-                        column_name = self.current_df.columns[col]
-                        if index_value < len_df:
-                            print(index_value)
-                            self.current_df.iloc[index_value, col] = new_value
-
-        # Clear existing table contents
-        self.table.setRowCount(0)
-        self.table.update_ui(records)
-
-        # Populate the table with new data
-        for index, row in records.iterrows():
-            row_position = self.table.rowCount()
-            ##row_position = row['ReqId2']
-            self.table.insertRow(row_position)
-            for col, value in enumerate(row):
-                self.table.setItem(row_position, col, QTableWidgetItem(str(value)))
